@@ -1,4 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
+using Flurl;
+using Flurl.Http;
+using Newtonsoft.Json;
+using Flurl.Http.Configuration;
 
 namespace rest_example.Controllers;
 
@@ -6,28 +10,42 @@ namespace rest_example.Controllers;
 [Route("[controller]")]
 public class CustomerController : ControllerBase
 {
-    private readonly Customers _customers;
 
-    public CustomerController(Customers customers)
+    public CustomerController()
     {
-        _customers = customers;
+        // FlurlHttp.Configure(settings =>
+        // {
+        //     var jsonSettings = new JsonSerializerSettings
+        //     {
+        //         NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore,
+        //         ObjectCreationHandling = ObjectCreationHandling.Replace
+        //     };
+        //     settings.JsonSerializer = new NewtonsoftJsonSerializer(jsonSettings);
+        // });
     }
+
 
     [HttpGet]
     public async Task<IActionResult> Get()
     {
         RequestCustomer request = new(
             call: "ListarClientesResumido",
-            app_key: "",
-            app_secret: "",
+            app_key: "key",
+            app_secret: "secret",
             new(){
                 new CustomerParam(
                     pagina: 1,
                     registros_por_pagina: 50,
                     apenas_importado_api: "N")
             });
-        var response = await _customers.Get(request);
-        return Ok(response);
+        //    http://app.omie.com.br/api/v1/geral/clientes/
+        var response = await "https://app.omie.com.br/api/v1/geral/clientes/"
+            .WithHeader("Content-type", "application/json")
+            .WithHeader("accept", "application/json")
+            .SendJsonAsync(HttpMethod.Post, request);
+        var responseString = await response.GetStringAsync();
+        var customers = System.Text.Json.JsonSerializer.Deserialize<CustomerOmieResponse>(responseString);
+        return Ok(customers);
     }
 }
 

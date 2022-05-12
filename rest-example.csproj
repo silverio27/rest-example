@@ -8,6 +8,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Flurl" Version="3.0.5" />
+    <PackageReference Include="Flurl.Http" Version="3.2.3" />
+    <PackageReference Include="Flurl.Http.Soap" Version="0.1.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
   </ItemGroup>
 
